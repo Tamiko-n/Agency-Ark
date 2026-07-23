@@ -156,8 +156,19 @@
 <script>
 const $ = id => document.getElementById(id);
 const API = location.origin;
-let token = localStorage.getItem('dispatch_token') || '';  
+let token = localStorage.getItem('dispatch_token') || '';
 let dests = [];
+
+// A token can also be handed over in the link: ?token=...
+// It is saved and then removed from the address bar.
+(function tokenFromUrl() {
+  const t = new URLSearchParams(location.search).get('token');
+  if (t) {
+    token = t;
+    localStorage.setItem('dispatch_token', t);
+    history.replaceState({}, '', location.pathname);
+  }
+})();
 
 $('ep').textContent = API + '/api/dispatch';
 $('ep-copy').onclick = async () => {
