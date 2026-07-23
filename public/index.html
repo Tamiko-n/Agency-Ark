@@ -156,7 +156,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const API = location.origin;
-let token = sessionStorage.getItem('dispatch_token') || '';
+let token = localStorage.getItem('dispatch_token') || '';  
 let dests = [];
 
 $('ep').textContent = API + '/api/dispatch';
@@ -295,7 +295,7 @@ $('t-send').onclick = async () => {
 
 $('tok-save').onclick = () => {
   token = $('tok').value.trim();
-  sessionStorage.setItem('dispatch_token', token);
+  localStorage.setItem('dispatch_token', token);
   toast(token ? 'Token saved for this session' : 'Token cleared');
   loadDests(); loadHist();
 };
