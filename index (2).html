@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dispatch — AgencyArk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --soft:#F7F8FA; --line:#E4E7EC; --line-2:#D0D5DD;
+    --text:#101828; --muted:#667085;
+    --blue:#2E6BFF; --blue-soft:#EEF3FF;
+    --green:#12A150; --green-soft:#E9F8EF;
+    --red:#D92D20;  --red-soft:#FEF0EF;
+    --amber:#B54708; --amber-soft:#FEF6EE;
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;
+       min-height:100vh;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:48px 24px 80px}
+
+  h1{font-size:29px;font-weight:700;letter-spacing:-.02em;margin:0 0 7px}
+  .lede{color:var(--muted);font-size:15px;line-height:1.55;margin:0 0 12px;max-width:60ch}
+  h2{font-size:12.5px;font-weight:600;letter-spacing:.04em;color:var(--muted);
+     margin:0 0 12px;text-transform:uppercase}
+  section{margin-bottom:38px}
+
+  /* endpoint banner */
+  .endpoint{display:flex;align-items:center;gap:12px;background:var(--blue-soft);
+    border:1px solid #C7D9FF;border-radius:var(--r);padding:13px 16px;margin-bottom:34px;flex-wrap:wrap}
+  .endpoint .lbl{font-size:12.5px;font-weight:600;color:var(--blue)}
+  .endpoint code{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--text);
+    background:#fff;border:1px solid #C7D9FF;border-radius:7px;padding:5px 10px;flex:1;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+
+  /* table */
+  .card{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row.head{background:var(--soft);font-size:12.5px;font-weight:600;color:var(--muted)}
+  .n{font-weight:600;font-size:14.5px;flex:0 0 190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .u{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);flex:1;
+     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--line);
+    color:var(--muted);background:#fff;white-space:nowrap}
+  .pill.on{color:var(--green);border-color:#A9E6C2;background:var(--green-soft)}
+  .ib{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;font-family:inherit;
+      padding:5px 9px;border-radius:6px}
+  .ib:hover{background:var(--soft);color:var(--text)}
+  .ib.danger:hover{background:var(--red-soft);color:var(--red)}
+  .empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
+
+  /* form */
+  .add{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  input[type=text],input[type=password]{font-family:inherit;font-size:14px;padding:11px 13px;
+    border:1px solid var(--line-2);border-radius:9px;background:#fff;color:var(--text);min-width:0}
+  #d-name{flex:0 0 210px}
+  #d-url{flex:1;font-family:'JetBrains Mono',monospace;font-size:12.5px}
+  input:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:var(--blue)}
+  .btn{font-family:inherit;font-size:14.5px;font-weight:600;background:var(--blue);color:#fff;border:0;
+    border-radius:9px;padding:11px 20px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .btn:hover:not(:disabled){background:#1D57E8}
+  .btn:disabled{background:#EAECF0;color:#98A2B3;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--muted);border:1px solid var(--line-2);font-weight:500}
+  .btn.ghost:hover{border-color:var(--muted);color:var(--text)}
+  .btn:focus-visible,.ib:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+  .hint{font-size:12.5px;color:var(--muted);margin:9px 0 0;line-height:1.55}
+  .hint code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--soft);
+    padding:2px 5px;border-radius:4px;border:1px solid var(--line)}
+
+  /* receipts */
+  .rcpt{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);
+        font-size:13.5px}
+  .rcpt:last-child{border-bottom:0}
+  .rcpt .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .rcpt.sent .dot{background:var(--green)}
+  .rcpt.failed .dot{background:var(--red)}
+  .rcpt.unrouted .dot{background:var(--amber)}
+  .rcpt .who{font-weight:600;flex:0 0 180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rcpt .what{flex:1;color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rcpt .when{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .rcpt .cnt{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;white-space:nowrap}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:var(--text);
+    color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;
+    transition:opacity .2s, transform .2s;max-width:90vw}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .toast.bad{background:var(--red)}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  textarea{width:100%;min-height:120px;font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    line-height:1.6;padding:14px;border:1px solid var(--line-2);border-radius:var(--r);
+    background:var(--soft);color:var(--text);resize:vertical}
+  textarea:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff}
+  details{margin-top:10px}
+  summary{cursor:pointer;font-size:13px;color:var(--muted);padding:4px 0}
+  summary:hover{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:640px){ #d-name{flex:1 1 100%} .n,.rcpt .who{flex-basis:120px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Dispatch</h1>
+  <p class="lede">Each contact goes to the sub-account named in its tag. Add a sub-account and the webhook that creates contacts in it, and everything tagged with that name is sent there.</p>
+
+  <div class="endpoint">
+    <span class="lbl">Point n8n here</span>
+    <code id="ep">…</code>
+    <button class="btn ghost" id="ep-copy">Copy</button>
+  </div>
+
+  <!-- destinations -->
+  <section>
+    <h2>Sub-accounts</h2>
+    <div class="card" id="dest"></div>
+    <div class="add">
+      <input type="text" id="d-name" placeholder="Sub-account name" aria-label="Sub-account name" />
+      <input type="text" id="d-url" placeholder="https://…  workflow webhook" aria-label="Webhook URL" />
+      <button class="btn" id="d-add">Save</button>
+    </div>
+    <p class="hint">The name has to match the tag on the contact. Case, spaces and punctuation are ignored — <code>Agency Ark</code> catches <code>agency-ark</code>.</p>
+  </section>
+
+  <!-- receipts -->
+  <section>
+    <h2>Recent activity</h2>
+    <div class="card" id="hist"><div class="empty">Loading…</div></div>
+    <div class="bar"><button class="btn ghost" id="h-refresh">Refresh</button></div>
+  </section>
+
+  <!-- test -->
+  <section>
+    <h2>Send a test</h2>
+    <textarea id="test" spellcheck="false"></textarea>
+    <div class="bar">
+      <button class="btn ghost" id="t-fill">Use my sub-accounts</button>
+      <button class="btn" id="t-send">Send test contacts</button>
+    </div>
+    <p class="hint">This posts to the same endpoint n8n uses, so a passing test means n8n will work too.</p>
+    <details>
+      <summary>Access token</summary>
+      <div class="bar">
+        <input type="password" id="tok" placeholder="Only if DISPATCH_TOKEN is set" aria-label="Dispatch token" style="flex:1" />
+        <button class="btn ghost" id="tok-save">Use token</button>
+      </div>
+    </details>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const API = location.origin;
+let token = sessionStorage.getItem('dispatch_token') || '';
+let dests = [];
+
+$('ep').textContent = API + '/api/dispatch';
+$('ep-copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(API + '/api/dispatch'); toast('Endpoint copied'); }
+  catch (e) { toast('Copy failed — select the URL manually', true); }
+};
+
+function toast(msg, bad) {
+  const t = $('toast'); t.textContent = msg;
+  t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast', 3200);
+}
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json',
+               ...(token ? { 'X-Dispatch-Token': token } : {}),
+               ...(opts.headers || {}) }
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || body.error || `Request failed (${r.status})`);
+  return body;
+}
+
+/* ---------------- destinations ---------------- */
+async function loadDests() {
+  try {
+    const { destinations } = await api('/api/destinations');
+    dests = destinations || [];
+    renderDests();
+  } catch (e) {
+    $('dest').innerHTML = `<div class="empty">Couldn't load sub-accounts.<br>${esc(e.message)}</div>`;
+  }
+}
+function renderDests() {
+  const el = $('dest');
+  if (!dests.length) {
+    el.innerHTML = `<div class="empty">No sub-accounts saved yet.<br>
+      Add one below and contacts tagged with that name will start arriving there.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="row head"><span class="n">Sub-account</span>
+      <span class="u">Webhook</span><span style="width:170px"></span></div>` +
+    dests.map(d => `<div class="row">
+      <span class="n" title="${esc(d.name)}">${esc(d.name)}</span>
+      <span class="u" title="${esc(d.webhook_url)}">${esc(d.webhook_url)}</span>
+      <span class="pill ${d.active ? 'on' : ''}">${d.active ? 'Receiving' : 'Paused'}</span>
+      <button class="ib" data-t="${d.id}">${d.active ? 'Pause' : 'Resume'}</button>
+      <button class="ib danger" data-r="${d.id}">Remove</button>
+    </div>`).join('');
+
+  el.querySelectorAll('[data-t]').forEach(b => b.onclick = async () => {
+    const d = dests.find(x => x.id === b.dataset.t);
+    try {
+      await api(`/api/destinations?id=${d.id}`, { method:'PATCH',
+        body: JSON.stringify({ active: !d.active }) });
+      toast(d.active ? `${d.name} paused` : `${d.name} receiving`);
+      loadDests();
+    } catch (e) { toast(e.message, true); }
+  });
+  el.querySelectorAll('[data-r]').forEach(b => b.onclick = async () => {
+    const d = dests.find(x => x.id === b.dataset.r);
+    if (!confirm(`Remove ${d.name}? Contacts tagged with this name will stop being delivered.`)) return;
+    try {
+      await api(`/api/destinations?id=${d.id}`, { method:'DELETE' });
+      toast(`${d.name} removed`); loadDests();
+    } catch (e) { toast(e.message, true); }
+  });
+}
+
+$('d-add').onclick = async () => {
+  const name = $('d-name').value.trim(), webhook_url = $('d-url').value.trim();
+  if (!name || !webhook_url) return toast('Enter a name and a webhook URL', true);
+  const btn = $('d-add'); btn.disabled = true;
+  try {
+    await api('/api/destinations', { method:'POST', body: JSON.stringify({ name, webhook_url }) });
+    $('d-name').value = ''; $('d-url').value = '';
+    toast(`${name} saved`); loadDests();
+  } catch (e) { toast(e.message, true); }
+  btn.disabled = false;
+};
+$('d-url').addEventListener('keydown', e => { if (e.key === 'Enter') $('d-add').click(); });
+
+/* ---------------- history ---------------- */
+async function loadHist() {
+  try {
+    const { history } = await api('/api/history?limit=40');
+    const el = $('hist');
+    if (!history || !history.length) {
+      el.innerHTML = `<div class="empty">Nothing dispatched yet.<br>
+        Send a test below, or point n8n at the endpoint above.</div>`;
+      return;
+    }
+    el.innerHTML = history.map(h => `<div class="rcpt ${esc(h.status)}">
+      <span class="dot"></span>
+      <span class="who">${esc(h.destination || 'No matching sub-account')}</span>
+      <span class="cnt">${h.contact_count}</span>
+      <span class="what">${esc(h.detail || (h.status === 'sent' ? 'delivered' : ''))}</span>
+      <span class="when">${new Date(h.created_at).toLocaleString()}</span>
+    </div>`).join('');
+  } catch (e) {
+    $('hist').innerHTML = `<div class="empty">Couldn't load activity.<br>${esc(e.message)}</div>`;
+  }
+}
+$('h-refresh').onclick = loadHist;
+
+/* ---------------- test ---------------- */
+function fillTest() {
+  const names = dests.length ? dests.map(d => d.name) : ['Agency Ark'];
+  $('test').value = JSON.stringify({ contacts: [
+    { lead_id:'TEST-0001', firstName:'John',  lastName:'Smith',  phone:'+14155550134',
+      email:'john@example.com', tags:[names[0]] },
+    { lead_id:'TEST-0002', firstName:'Maria', lastName:'Garcia', phone:'+14155550198',
+      email:'maria@example.com', tags:[names[1] || names[0]] },
+    { lead_id:'TEST-0003', firstName:'Unmatched', lastName:'Person', phone:'+14155550111',
+      email:'nobody@example.com', tags:['Not A Real Sub-account'] }
+  ]}, null, 2);
+}
+$('t-fill').onclick = () => { fillTest(); toast('Test contacts ready'); };
+
+$('t-send').onclick = async () => {
+  const btn = $('t-send'); btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const payload = JSON.parse($('test').value || '{"contacts":[]}');
+    const r = await api('/api/dispatch', { method:'POST', body: JSON.stringify(payload) });
+    toast(`${r.sent} delivered, ${r.unrouted} with no matching sub-account`,
+          r.unrouted > 0 && r.sent === 0);
+    loadHist();
+  } catch (e) { toast(e.message, true); }
+  btn.textContent = 'Send test contacts'; btn.disabled = false;
+};
+
+$('tok-save').onclick = () => {
+  token = $('tok').value.trim();
+  sessionStorage.setItem('dispatch_token', token);
+  toast(token ? 'Token saved for this session' : 'Token cleared');
+  loadDests(); loadHist();
+};
+
+/* ---------------- boot ---------------- */
+$('tok').value = token;
+loadDests().then(() => { fillTest(); });
+loadHist();
+</script>
+</body>
+</html>
