@@ -1,7 +1,9 @@
 // Shared helpers. No npm dependencies — talks to Supabase over its REST API
 // using the global fetch available in the Vercel Node runtime.
 
-const SUPABASE_URL = process.env.SUPABASE_URL;          // https://xxxx.supabase.co
+// Trailing slashes are stripped: a pasted "…supabase.co/" would otherwise
+// produce "…supabase.co//rest/v1/…" and Supabase rejects that path.
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
 const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY;  // service_role key
 const TOKEN        = process.env.DISPATCH_TOKEN;        // optional shared secret
 
